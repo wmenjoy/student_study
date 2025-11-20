@@ -654,3 +654,14 @@ h3::before {
   75% { transform: translateX(-3px) }
   100% { transform: translateX(0) }
 }
+/* Grade Card Hover Effect */
+.grade-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 8px 12px rgba(0, 0, 0, 0.15) !important;
+}
+
+/* Category Card Hover Effect */
+.category-card:hover {
+  border-color: #667eea !important;
+  background: #f3f4f6 !important;
+}

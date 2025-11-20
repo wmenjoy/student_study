@@ -51,7 +51,7 @@ export function VisualCanvas({ instructions, width = 600, height = 400 }: Visual
       switch (inst.type) {
         case 'line':
           if (inst.x1 !== undefined && inst.y1 !== undefined &&
-              inst.x2 !== undefined && inst.y2 !== undefined) {
+            inst.x2 !== undefined && inst.y2 !== undefined) {
             ctx.lineWidth = 2
             ctx.beginPath()
             ctx.moveTo(inst.x1, inst.y1)
@@ -62,7 +62,7 @@ export function VisualCanvas({ instructions, width = 600, height = 400 }: Visual
 
         case 'rect':
           if (inst.x !== undefined && inst.y !== undefined &&
-              inst.width !== undefined && inst.height !== undefined) {
+            inst.width !== undefined && inst.height !== undefined) {
             ctx.lineWidth = 2
             ctx.strokeRect(inst.x, inst.y, inst.width, inst.height)
             ctx.globalAlpha = 0.2
@@ -107,7 +107,7 @@ export function VisualCanvas({ instructions, width = 600, height = 400 }: Visual
 
         case 'arrow':
           if (inst.x1 !== undefined && inst.y1 !== undefined &&
-              inst.x2 !== undefined && inst.y2 !== undefined) {
+            inst.x2 !== undefined && inst.y2 !== undefined) {
             ctx.lineWidth = 2
             ctx.strokeStyle = color
             ctx.fillStyle = color

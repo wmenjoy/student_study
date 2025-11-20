@@ -28,7 +28,6 @@ export default function Page() {
             <Link
               key={grade}
               href={`/grade/${grade}`}
-              className="grade-card"
               style={{
                 display: 'flex',
                 flexDirection: 'column',
@@ -43,6 +42,14 @@ export default function Page() {
                 fontSize: '18px',
                 boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
                 transition: 'transform 0.2s, box-shadow 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.transform = 'translateY(-4px)'
+                e.currentTarget.style.boxShadow = '0 8px 12px rgba(0,0,0,0.15)'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.transform = 'translateY(0)'
+                e.currentTarget.style.boxShadow = '0 4px 6px rgba(0,0,0,0.1)'
               }}
             >
               <div style={{ fontSize: '32px', marginBottom: '8px' }}>
@@ -246,7 +253,6 @@ export default function Page() {
             <Link
               key={cat.id}
               href={`/category/${encodeURIComponent(cat.id)}`}
-              className="category-card"
               style={{
                 padding: '20px',
                 background: '#f9fafb',
@@ -255,6 +261,14 @@ export default function Page() {
                 color: '#111827',
                 border: '2px solid #e5e7eb',
                 transition: 'all 0.2s'
+              }}
+              onMouseEnter={(e) => {
+                e.currentTarget.style.borderColor = '#667eea'
+                e.currentTarget.style.background = '#f3f4f6'
+              }}
+              onMouseLeave={(e) => {
+                e.currentTarget.style.borderColor = '#e5e7eb'
+                e.currentTarget.style.background = '#f9fafb'
               }}
             >
               <div style={{ fontSize: '32px', marginBottom: '8px' }}>{cat.icon}</div>
