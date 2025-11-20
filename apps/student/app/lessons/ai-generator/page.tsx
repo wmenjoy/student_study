@@ -1,5 +1,5 @@
 "use client"
-import { useState, useEffect } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
 import { LessonRunner } from "../../../components/LessonRunner"
 import { StepPlayer } from "../../../components/StepPlayer"
 import { Narration } from "../../../components/Narration"
@@ -61,6 +61,9 @@ export default function AIGeneratorPage() {
   const [apiKey, setApiKey] = useState("")
   const [useCloud, setUseCloud] = useState(false)
   const [provider, setProvider] = useState<'ollama' | 'openrouter'>('ollama')
+  
+  // 跟踪是否已初始化
+  const initializationRef = useRef(false)
 
   // OpenRouter 免费模型列表
   const openrouterFreeModels = [
@@ -97,21 +100,48 @@ export default function AIGeneratorPage() {
     if (savedApiKey) setApiKey(savedApiKey)
     if (savedUseCloud) setUseCloud(savedUseCloud === "true")
     if (savedProvider) setProvider(savedProvider)
+    else {
+      // 默认先尝试 Ollama
+      setProvider('ollama')
+    }
+  }, [])
+  
+  // 初始化检查 - 只在组件挂载时运行一次
+  useEffect(() => {
+    if (initializationRef.current) return
+    initializationRef.current = true
+    
+    const performInitialCheck = async () => {
+      // 先尝试 Ollama
+      const config = {
+        endpoint: useCloud ? apiEndpoint : undefined,
+        apiKey: useCloud ? apiKey : undefined,
+      }
+      const available = await checkOllamaAvailable(config)
+      
+      if (available) {
+        setOllamaAvailable(true)
+        const modelList = await getAvailableModels(config)
+        if (modelList.length > 0) {
+          setModels(modelList)
+          // 优先选择 qwen 模型
+          const qwenModel = modelList.find(m => m.includes('qwen'))
+          setSelectedModel(qwenModel || modelList[0])
+        }
+      } else {
+        // Ollama 不可用，自动切换到 OpenRouter 作为后备方案
+        setProvider('openrouter')
+        setOllamaAvailable(true)
+        setModels(openrouterFreeModels)
+        setSelectedModel(openrouterFreeModels[0])
+      }
+    }
+    
+    performInitialCheck()
   }, [])
 
-  // 保存配置
-  const handleSaveConfig = () => {
-    localStorage.setItem("ollama_endpoint", apiEndpoint)
-    localStorage.setItem("ollama_api_key", apiKey)
-    localStorage.setItem("ollama_use_cloud", String(useCloud))
-    localStorage.setItem("ollama_provider", provider)
-    setShowConfig(false)
-    // 重新检查可用性
-    checkAvailability()
-  }
-
-  // 检查 Ollama 可用性
-  const checkAvailability = async () => {
+  // 手动检查当前提供商的可用性
+  const manualCheckAvailability = useCallback(async () => {
     if (provider === 'openrouter') {
       // OpenRouter: 如果有 API Key，尝试获取免费模型列表
       if (apiKey) {
@@ -129,7 +159,6 @@ export default function AIGeneratorPage() {
             if (data.models && data.models.length > 0) {
               setModels(data.models)
               setSelectedModel(data.models[0])
-              setOllamaAvailable(true)
               return
             }
           }
@@ -139,40 +168,39 @@ export default function AIGeneratorPage() {
       }
 
       // 使用默认的免费模型列表
-      setOllamaAvailable(true)
       setModels(openrouterFreeModels)
       setSelectedModel(openrouterFreeModels[0])
       return
     }
 
+    // 检查 Ollama
     const config = {
       endpoint: useCloud ? apiEndpoint : undefined,
       apiKey: useCloud ? apiKey : undefined,
     }
     const available = await checkOllamaAvailable(config)
-    setOllamaAvailable(available)
-
+    
     if (available) {
       const modelList = await getAvailableModels(config)
-      setModels(modelList)
       if (modelList.length > 0) {
+        setModels(modelList)
         // 优先选择 qwen 模型
         const qwenModel = modelList.find(m => m.includes('qwen'))
         setSelectedModel(qwenModel || modelList[0])
       }
     }
+  }, [provider, useCloud, apiEndpoint, apiKey, openrouterFreeModels])
+
+  // 保存配置
+  const handleSaveConfig = () => {
+    localStorage.setItem("ollama_endpoint", apiEndpoint)
+    localStorage.setItem("ollama_api_key", apiKey)
+    localStorage.setItem("ollama_use_cloud", String(useCloud))
+    localStorage.setItem("ollama_provider", provider)
+    setShowConfig(false)
+    // 重新检查可用性
+    manualCheckAvailability()
   }
-
-  useEffect(() => {
-    checkAvailability()
-  }, [useCloud, provider])
-
-  // 当 OpenRouter API Key 变化时，重新获取模型列表
-  useEffect(() => {
-    if (provider === 'openrouter' && apiKey) {
-      checkAvailability()
-    }
-  }, [apiKey])
 
   const handleGenerate = async () => {
     if (!selectedModel) {
