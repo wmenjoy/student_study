@@ -1,5 +1,5 @@
 import { describe, it, expect } from "vitest"
-import { MinesEngine } from "../../components/MinesEngine"
+import { MinesEngine, Board } from "../../components/MinesEngine"
 
 describe("MinesEngine", () => {
   it("first reveal is safe", () => {
@@ -20,8 +20,9 @@ describe("MinesEngine", () => {
   it("win when all non-mines opened", () => {
     const eng = new MinesEngine(2, 2, 1)
     const b = eng.createEmpty()
-    const planted = { ...b, mines: new Uint8Array([1,0,0,0]), numbers: eng.computeNumbers(new Uint8Array([1,0,0,0])) }
-    let r = planted
+    const minesArray = new Uint8Array([1,0,0,0])
+    const planted = { ...b, mines: minesArray, numbers: eng.computeNumbers(minesArray) }
+    let r: Board = planted
     r = eng.reveal(r, 1)
     r = eng.reveal(r, 2)
     r = eng.reveal(r, 3)

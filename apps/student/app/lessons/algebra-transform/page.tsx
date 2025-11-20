@@ -21,9 +21,9 @@ export default function AlgebraTransformPage() {
       const items=[] as Array<{prompt:string;placeholder?:string;check:(v:string)=>boolean}>
       const inter = a - b
       const res = a - b - c
-      if(diff==="easy"){items.push({prompt:"去括号后的式子？",placeholder:"写如 a-b-c",check:x=>x.replaceAll(" ","")===`${a}-${b}-${c}`})}
-      else if(diff==="medium"){items.push({prompt:"先算哪一步？",placeholder:"写如 a-b",check:x=>x.replaceAll(" ","").toLowerCase()==="a-b"})}
-      else {items.push({prompt:"中间结果与最终结果？",placeholder:"写如 200 和 144",check:x=>{const s=x.replaceAll(" ","").split("和");return s.length===2 && parseInt(s[0])===inter && parseInt(s[1])===res}})}
+      if(diff==="easy"){items.push({prompt:"去括号后的式子？",placeholder:"写如 a-b-c",check:x=>x.replace(/ /g,"")===`${a}-${b}-${c}`})}
+      else if(diff==="medium"){items.push({prompt:"先算哪一步？",placeholder:"写如 a-b",check:x=>x.replace(/ /g,"").toLowerCase()==="a-b"})}
+      else {items.push({prompt:"中间结果与最终结果？",placeholder:"写如 200 和 144",check:x=>{const s=x.replace(/ /g,"").split("和");return s.length===2 && parseInt(s[0])===inter && parseInt(s[1])===res}})}
       return items
     }} onEvaluate={()=>({ correct: true, text: `结果=${a-b-c}` })}>
       <div className="controls">

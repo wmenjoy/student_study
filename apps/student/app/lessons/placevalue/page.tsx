@@ -14,7 +14,7 @@ export default function PlaceValuePage() {
       const h=Math.floor(v/100), t=Math.floor((v%100)/10), o=v%10
       const items=[] as Array<{prompt:string;placeholder?:string;check:(v:string)=>boolean}>
       if(diff==="easy"){items.push({prompt:"求 百 的数量",placeholder:"输入数量",check:x=>Math.abs(parseFloat(x)-h)<1e-6});items.push({prompt:"求 十 的数量",placeholder:"输入数量",check:x=>Math.abs(parseFloat(x)-t)<1e-6})}
-      else if(diff==="medium"){items.push({prompt:"写出 分解 表达式",placeholder:"如 3×100+4×10+5",check:x=>x.replaceAll(" ","")===`${h}×100+${t}×10+${o}`})}
+      else if(diff==="medium"){items.push({prompt:"写出 分解 表达式",placeholder:"如 3×100+4×10+5",check:x=>x.replace(/ /g,"")===`${h}×100+${t}×10+${o}`})}
       else {items.push({prompt:`把 数值 改为 ${v+110} 的 百 数量`,placeholder:"输入数量",check:x=>Math.abs(parseFloat(x)-Math.floor((v+110)/100))<1e-6})}
       return items
     }} onEvaluate={()=>({ correct: true, text: `分解: ${Math.floor(v/100)}×100 + ${Math.floor((v%100)/10)}×10 + ${v%10}` })}>

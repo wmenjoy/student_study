@@ -27,7 +27,7 @@ export default function TicketPage() {
       const C = n - A
       if(diff==="easy"){items.push({prompt:"成人票数量是多少？",placeholder:"输入数字",check:x=>parseInt(x)===A})}
       else if(diff==="medium"){items.push({prompt:"儿童票数量是多少？",placeholder:"输入数字",check:x=>parseInt(x)===C})}
-      else {items.push({prompt:"写出方程",placeholder:"如 5A+3C=74, A+C=20",check:x=>x.replaceAll(" ","")==`${pa}A+${pc}C=${r},A+C=${n}`})}
+      else {items.push({prompt:"写出方程",placeholder:"如 5A+3C=74, A+C=20",check:x=>x.replace(/ /g,"")==`${pa}A+${pc}C=${r},A+C=${n}`})}
       return items
     }} onEvaluate={()=>({ correct: true, text: mapTicket(pa,pc,n,r) })}>
       <div className="controls">

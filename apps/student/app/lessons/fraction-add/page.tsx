@@ -112,20 +112,20 @@ export default function FractionAddPage() {
         const simp = `${Math.abs(tot) / gg}/${den / gg}`
         if (diff === "easy") { items.push({ prompt: "LCM是多少？", placeholder: "输入LCM", check: x => Math.abs(parseFloat(x) - den) < 1e-6 }) }
         else if (diff === "medium") {
-          items.push({ prompt: "等值分数是多少？写出 a' 与 b' 的和/差", placeholder: "写如 5/12", check: x => x.replaceAll(" ", "") === `${tot}/${den}` });
+          items.push({ prompt: "等值分数是多少？写出 a' 与 b' 的和/差", placeholder: "写如 5/12", check: x => x.replace(/ /g, "") === `${tot}/${den}` });
           items.push({
             prompt: "列出LCM的因子幂次（如 2^2·3^1）", placeholder: "输入表达式", check: x => {
               const primes = Array.from(new Set([...ca.keys(), ...cb.keys()])).sort((x, y) => x - y)
               const mk = (p: number) => Math.max(ca.get(p) || 0, cb.get(p) || 0)
               const expect = primes.map(p => `${p}^${mk(p)}`).join("·")
-              return x.replaceAll(" ", "") === expect
+              return x.replace(/ /g, "") === expect
             }
           })
         }
         else {
-          items.push({ prompt: "最简结果是多少？", placeholder: "写如 5/12", check: x => x.replaceAll(" ", "") === simp })
+          items.push({ prompt: "最简结果是多少？", placeholder: "写如 5/12", check: x => x.replace(/ /g, "") === simp })
           const gexp = (n: number) => { const mm = getFactors(n); return Array.from(mm.entries()).sort((a, b) => a[0] - b[0]).map(([p, k]) => `${p}^${k}`).join("·") }
-          items.push({ prompt: "约分因子写成幂次表达式", placeholder: "如 2^1·3^2", check: x => x.replaceAll(" ", "") === gexp(gg) })
+          items.push({ prompt: "约分因子写成幂次表达式", placeholder: "如 2^1·3^2", check: x => x.replace(/ /g, "") === gexp(gg) })
         }
         return items
       }}
