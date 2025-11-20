@@ -14,10 +14,22 @@ export const homeMath = [
   { href: "/lessons/vertical-animated", title: "竖式进/借位动画", desc: "逐列高亮与标记", icon: "/icons/number-line.svg" },
   { href: "/lessons/fraction-add", title: "分数通分与约分", desc: "LCM通分,GCD约分", icon: "/icons/area.svg" },
   { href: "/lessons/fill-operators", title: "填写运算符号", desc: "逻辑推理训练", icon: "/icons/prob.svg" },
+<<<<<<< HEAD
   { href: "/lessons/math-climbing", title: "数学爬阶游戏", desc: "答题爬梯达旗帜", icon: "/icons/climbing.svg" }
   ,{ href: "/lessons/spatial-reasoning", title: "空间力训练", desc: "积木/数独/天平", icon: "/icons/area.svg" }
   ,{ href: "/lessons/fifteen", title: "数字滑块（Fifteen）", desc: "滑块排序与空间推理", icon: "/icons/area.svg" }
   ,{ href: "/lessons/mines", title: "扫雷（Mines）", desc: "旗标与邻域逻辑推理", icon: "/icons/prob.svg" }
+=======
+  { href: "/lessons/math-climbing", title: "数学爬阶游戏", desc: "答题爬梯达旗帜", icon: "/icons/climbing.svg" },
+  { href: "/lessons/multiplier", title: "倍数问题", desc: "差÷(倍数-1)", icon: "/icons/ratio.svg" },
+  { href: "/lessons/sawing", title: "锯木头问题", desc: "段数=刀数+1", icon: "/icons/area.svg" },
+  { href: "/lessons/surplus-deficit", title: "盈亏问题", desc: "盈亏相加除以差", icon: "/icons/ratio.svg" },
+  { href: "/lessons/engineering", title: "工程问题", desc: "效率与合作", icon: "/icons/scale.svg" },
+  { href: "/lessons/concentration", title: "浓度问题", desc: "溶质÷溶液", icon: "/icons/area.svg" },
+  { href: "/lessons/shopping", title: "购物问题", desc: "桌椅价格差", icon: "/icons/words.svg" },
+  { href: "/lessons/container", title: "容量问题", desc: "油桶称重", icon: "/icons/scale.svg" },
+  { href: "/lessons/ai-generator", title: "AI智能出题", desc: "本地AI生成题目", icon: "/icons/prob.svg" }
+>>>>>>> e22fc59800414dc5b497fef87bf6257a89783910
 ]
 
 export const homeChinese = [
@@ -70,7 +82,14 @@ export const templates = [
   { href: "/lessons/figure-count", title: "图形计数", desc: "网格枚举", icon: "/icons/area.svg" },
   { href: "/lessons/ticket", title: "车票问题", desc: "两元一次方程", icon: "/icons/scale.svg" },
   { href: "/lessons/age", title: "年龄问题", desc: "和差求龄", icon: "/icons/ratio.svg" },
-  { href: "/lessons/river-boat", title: "流水行船", desc: "上/下行时间", icon: "/icons/journey.svg" }
+  { href: "/lessons/river-boat", title: "流水行船", desc: "上/下行时间", icon: "/icons/journey.svg" },
+  { href: "/lessons/multiplier", title: "倍数问题", desc: "差÷(倍数-1)", icon: "/icons/ratio.svg" },
+  { href: "/lessons/sawing", title: "锯木头问题", desc: "段数=刀数+1", icon: "/icons/area.svg" },
+  { href: "/lessons/surplus-deficit", title: "盈亏问题", desc: "盈亏相加除以差", icon: "/icons/ratio.svg" },
+  { href: "/lessons/engineering", title: "工程问题", desc: "效率与合作", icon: "/icons/scale.svg" },
+  { href: "/lessons/concentration", title: "浓度问题", desc: "溶质÷溶液", icon: "/icons/area.svg" },
+  { href: "/lessons/shopping", title: "购物问题", desc: "桌椅价格差", icon: "/icons/words.svg" },
+  { href: "/lessons/container", title: "容量问题", desc: "油桶称重", icon: "/icons/scale.svg" }
 ]
 
 export const methodGroups = [
@@ -92,7 +111,10 @@ export const methodGroups = [
       { href: "/lessons/clock", title: "时钟问题", desc: "分钟换算", icon: "/icons/number-line.svg" },
       { href: "/lessons/series-pair", title: "等差配对求和", desc: "高斯配对法", icon: "/icons/number-line.svg" },
       { href: "/lessons/defect-gum", title: "找次品(天平)", desc: "3v3→1v1，2次确定", icon: "/icons/scale.svg" },
-      { href: "/lessons/river-boat", title: "流水行船", desc: "上/下行时间", icon: "/icons/journey.svg" }
+      { href: "/lessons/river-boat", title: "流水行船", desc: "上/下行时间", icon: "/icons/journey.svg" },
+      { href: "/lessons/multiplier", title: "倍数问题", desc: "差÷(倍数-1)", icon: "/icons/ratio.svg" },
+      { href: "/lessons/surplus-deficit", title: "盈亏问题", desc: "盈亏相加除以差", icon: "/icons/ratio.svg" },
+      { href: "/lessons/engineering", title: "工程问题", desc: "效率与合作", icon: "/icons/scale.svg" }
     ]
   },
   {
@@ -127,17 +149,25 @@ export const methodGroups = [
       { href: "/lessons/cashier", title: "钱币与找零", desc: "凑整与找零", icon: "/icons/words.svg" },
       { href: "/lessons/net-weight", title: "净重问题", desc: "两次称重求原重", icon: "/icons/scale.svg" },
       { href: "/lessons/planting", title: "植树问题", desc: "段与棵数", icon: "/icons/area.svg" },
-      { href: "/lessons/cut-segments", title: "剪绳子/锯木头", desc: "段数与总长", icon: "/icons/area.svg" }
+      { href: "/lessons/cut-segments", title: "剪绳子/锯木头", desc: "段数与总长", icon: "/icons/area.svg" },
+      { href: "/lessons/sawing", title: "锯木头问题", desc: "段数=刀数+1", icon: "/icons/area.svg" },
+      { href: "/lessons/concentration", title: "浓度问题", desc: "溶质÷溶液", icon: "/icons/area.svg" },
+      { href: "/lessons/shopping", title: "购物问题", desc: "桌椅价格差", icon: "/icons/words.svg" },
+      { href: "/lessons/container", title: "容量问题", desc: "油桶称重", icon: "/icons/scale.svg" }
     ]
   },
   {
     label: "游戏",
     items: [
       { href: "/lessons/math-climbing", title: "数学爬阶游戏", desc: "答题爬梯达旗帜", icon: "/icons/climbing.svg" },
+<<<<<<< HEAD
       { href: "/lessons/multiplication-crossword", title: "九九乘法棋盘", desc: "乘除法填空游戏", icon: "/icons/area.svg" },
       { href: "/lessons/grid-filling", title: "方格谜题", desc: "面积与逻辑", icon: "/icons/area.svg" },
       { href: "/lessons/fifteen", title: "数字滑块（Fifteen）", desc: "滑块排序与空间推理", icon: "/icons/area.svg" },
       { href: "/lessons/mines", title: "扫雷（Mines）", desc: "旗标与邻域逻辑推理", icon: "/icons/prob.svg" }
+=======
+      { href: "/lessons/ai-generator", title: "AI智能出题", desc: "本地AI生成题目", icon: "/icons/prob.svg" }
+>>>>>>> e22fc59800414dc5b497fef87bf6257a89783910
     ]
   }
 ]

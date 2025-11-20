@@ -1,0 +1,71 @@
+import { NextRequest, NextResponse } from 'next/server'
+
+const OLLAMA_BASE_URL = process.env.OLLAMA_URL || 'http://localhost:11434'
+
+export async function GET() {
+  try {
+    const response = await fetch(`${OLLAMA_BASE_URL}/api/tags`, {
+      method: 'GET',
+      signal: AbortSignal.timeout(5000),
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch models')
+    }
+
+    const data = await response.json()
+    const models = data.models?.map((m: any) => m.name) || []
+
+    return NextResponse.json({ models })
+  } catch (error) {
+    return NextResponse.json({
+      models: [],
+      error: error instanceof Error ? error.message : 'Failed to fetch models'
+    }, { status: 500 })
+  }
+}
+
+export async function POST(request: NextRequest) {
+  try {
+    let endpoint = OLLAMA_BASE_URL
+    let apiKey: string | undefined
+
+    try {
+      const body = await request.json()
+      if (body.endpoint) {
+        endpoint = body.endpoint
+      }
+      if (body.apiKey) {
+        apiKey = body.apiKey
+      }
+    } catch (e) {
+      // 如果没有 body 或 JSON 解析失败，使用默认值
+    }
+
+    const headers: HeadersInit = {}
+
+    if (apiKey) {
+      headers['Authorization'] = `Bearer ${apiKey}`
+    }
+
+    const response = await fetch(`${endpoint}/api/tags`, {
+      method: 'GET',
+      headers,
+      signal: AbortSignal.timeout(5000),
+    })
+
+    if (!response.ok) {
+      throw new Error('Failed to fetch models')
+    }
+
+    const data = await response.json()
+    const models = data.models?.map((m: any) => m.name) || []
+
+    return NextResponse.json({ models })
+  } catch (error) {
+    return NextResponse.json({
+      models: [],
+      error: error instanceof Error ? error.message : 'Failed to fetch models'
+    }, { status: 500 })
+  }
+}
