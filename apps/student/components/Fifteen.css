@@ -1,0 +1,102 @@
+.fifteen {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+    max-width: 900px;
+    margin: 0 auto;
+}
+
+.fifteen-status-bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px 16px;
+    font-size: 14px;
+}
+
+.fifteen-status-bar .status-left {
+    font-weight: 700;
+    color: var(--text);
+}
+
+.fifteen-status-bar .status-center {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.fifteen-status-bar .badge {
+    padding: 4px 8px;
+    border-radius: 8px;
+    font-size: 13px;
+    font-weight: 600;
+}
+
+.fifteen-status-bar .badge.success { background: #dcfce7; color: #166534; }
+.fifteen-status-bar .badge.neutral { background: #f1f5f9; color: #475569; }
+
+.fifteen-status-bar .status-right .timer {
+    font-family: monospace;
+    font-size: 15px;
+    color: var(--muted);
+}
+
+.fifteen-body { display: flex; gap: 16px; }
+.fifteen-sidebar { flex: 0 0 220px; display: flex; flex-direction: column; gap: 16px; }
+
+.fifteen-controls {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
+}
+
+.fifteen-controls .control-row { display: flex; align-items: center; gap: 8px; }
+.fifteen-controls label { font-size: 14px; color: var(--muted); width: 60px; }
+.fifteen-controls select { flex: 1; height: 32px; border: 1px solid var(--border); border-radius: 8px; padding: 0 8px; font-size: 14px; background: #fff; }
+.fifteen-controls .btn { flex: 1; }
+
+.fifteen-board {
+    display: grid;
+    gap: 6px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 12px;
+    touch-action: none;
+    user-select: none;
+}
+
+.tile {
+    width: 56px;
+    height: 56px;
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    background: #fff;
+    color: var(--text);
+    font-size: 20px;
+    font-weight: 700;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    transition: all 0.15s ease;
+}
+
+.tile:hover { background: #f0f9ff; border-color: var(--primary); }
+.tile-empty { background: #f3f4f6; color: #9ca3af; cursor: default; }
+
+.fifteen-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.4); display: flex; align-items: center; justify-content: center; z-index: 50; }
+.fifteen-modal { background: #fff; border-radius: 16px; padding: 24px; text-align: center; max-width: 280px; width: 90%; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+
+@media (max-width: 640px) {
+  .fifteen-body { flex-direction: column; }
+  .fifteen-sidebar { flex: 1; }
+  .tile { width: 44px; height: 44px; font-size: 18px; }
+}

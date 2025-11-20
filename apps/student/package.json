@@ -10,20 +10,25 @@
     "test": "vitest"
   },
   "dependencies": {
+    "@types/canvas-confetti": "^1.9.0",
+    "canvas-confetti": "^1.9.4",
+    "clsx": "^2.1.1",
+    "dexie": "^4.0.4",
+    "framer-motion": "^11.0.0",
+    "lucide-react": "^0.554.0",
     "next": "^14.2.0",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
-    "zustand": "^4.5.0",
-    "dexie": "^4.0.4",
+    "tailwind-merge": "^3.4.0",
     "xstate": "^5.17.1",
-    "framer-motion": "^11.0.0"
+    "zustand": "^4.5.0"
   },
   "devDependencies": {
-    "typescript": "^5.6.3",
-    "@types/react": "^18.2.67",
     "@types/node": "^20.11.30",
+    "@types/react": "^18.2.67",
     "eslint": "^8.57.0",
     "eslint-config-next": "^14.2.0",
+    "typescript": "^5.6.3",
     "vitest": "^1.6.0"
   }
 }

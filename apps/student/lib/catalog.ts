@@ -15,13 +15,17 @@ export const homeMath = [
   { href: "/lessons/fraction-add", title: "分数通分与约分", desc: "LCM通分,GCD约分", icon: "/icons/area.svg" },
   { href: "/lessons/fill-operators", title: "填写运算符号", desc: "逻辑推理训练", icon: "/icons/prob.svg" },
   { href: "/lessons/math-climbing", title: "数学爬阶游戏", desc: "答题爬梯达旗帜", icon: "/icons/climbing.svg" }
+  ,{ href: "/lessons/spatial-reasoning", title: "空间力训练", desc: "积木/数独/天平", icon: "/icons/area.svg" }
+  ,{ href: "/lessons/fifteen", title: "数字滑块（Fifteen）", desc: "滑块排序与空间推理", icon: "/icons/area.svg" }
+  ,{ href: "/lessons/mines", title: "扫雷（Mines）", desc: "旗标与邻域逻辑推理", icon: "/icons/prob.svg" }
 ]
 
 export const homeChinese = [
   { href: "/lessons/hanzi", title: "笔画演示", desc: "笔顺与临摹", icon: "/icons/hanzi.svg" },
   { href: "/lessons/words", title: "词语小游戏", desc: "近反义词练习", icon: "/icons/words.svg" },
   { href: "/lessons/sentence-order", title: "句子重排", desc: "语序与表达", icon: "/icons/words.svg" },
-  { href: "/lessons/punctuation", title: "标点练习", desc: "停顿与语气", icon: "/icons/words.svg" }
+  { href: "/lessons/punctuation", title: "标点练习", desc: "停顿与语气", icon: "/icons/words.svg" },
+  { href: "/lessons/logic-writers", title: "逻辑家庭推理", desc: "关系重叠与计数", icon: "/icons/words.svg" }
 ]
 
 export const grade2Topics = [
@@ -46,7 +50,8 @@ export const grade2Topics = [
   { href: "/lessons/clock", title: "时钟问题", desc: "时分读数", icon: "/icons/number-line.svg" },
   { href: "/lessons/net-weight", title: "净重问题", desc: "毛重与皮重", icon: "/icons/scale.svg" },
   { href: "/lessons/planting", title: "植树问题", desc: "段与棵数", icon: "/icons/area.svg" },
-  { href: "/lessons/fill-operators", title: "填写运算符号", desc: "逻辑推理", icon: "/icons/prob.svg" }
+  { href: "/lessons/fill-operators", title: "填写运算符号", desc: "逻辑推理", icon: "/icons/prob.svg" },
+  { href: "/lessons/grid-filling", title: "方格谜题", desc: "面积与逻辑", icon: "/icons/area.svg" }
 ]
 
 export const templates = [
@@ -128,7 +133,11 @@ export const methodGroups = [
   {
     label: "游戏",
     items: [
-      { href: "/lessons/math-climbing", title: "数学爬阶游戏", desc: "答题爬梯达旗帜", icon: "/icons/climbing.svg" }
+      { href: "/lessons/math-climbing", title: "数学爬阶游戏", desc: "答题爬梯达旗帜", icon: "/icons/climbing.svg" },
+      { href: "/lessons/multiplication-crossword", title: "九九乘法棋盘", desc: "乘除法填空游戏", icon: "/icons/area.svg" },
+      { href: "/lessons/grid-filling", title: "方格谜题", desc: "面积与逻辑", icon: "/icons/area.svg" },
+      { href: "/lessons/fifteen", title: "数字滑块（Fifteen）", desc: "滑块排序与空间推理", icon: "/icons/area.svg" },
+      { href: "/lessons/mines", title: "扫雷（Mines）", desc: "旗标与邻域逻辑推理", icon: "/icons/prob.svg" }
     ]
   }
 ]
