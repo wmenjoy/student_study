@@ -1,5 +1,9 @@
 "use client"
-import { useState, useEffect, useRef } from "react"
+import { useState, useEffect, useCallback, useRef } from "react"
+import { LessonRunner } from "../../../components/LessonRunner"
+import { StepPlayer } from "../../../components/StepPlayer"
+import { Narration } from "../../../components/Narration"
+import { VisualCanvas } from "../../../components/VisualCanvas"
 import {
   checkOllamaAvailable,
   getAvailableModels,
@@ -7,23 +11,30 @@ import {
   GeneratedQuestion,
   QuestionGenerateParams
 } from "../../../lib/ollamaService"
-import { VisualCanvas } from "../../../components/VisualCanvas"
-import { Narration } from "../../../components/Narration"
-import { StepPlayer } from "../../../components/StepPlayer"
 
 const questionTypes = [
-  { value: "和差问题", label: "和差问题", icon: "🧮", grades: [1, 2, 3, 4, 5, 6], desc: "求两数的和与差" },
-  { value: "倍数问题", label: "倍数问题", icon: "✖️", grades: [3, 4, 5, 6], desc: "一个数是另一个的几倍" },
-  { value: "行程问题", label: "行程问题", icon: "🚗", grades: [4, 5, 6], desc: "速度、时间、路程" },
-  { value: "工程问题", label: "工程问题", icon: "🏗️", grades: [5, 6], desc: "工作效率与时间" },
-  { value: "购物问题", label: "购物问题", icon: "🛒", grades: [1, 2, 3, 4, 5, 6], desc: "价格、数量、总价" },
-  { value: "容量问题", label: "容量问题", icon: "🥤", grades: [1, 2, 3, 4, 5, 6], desc: "容器的大小和容量" },
-  { value: "植树问题", label: "植树问题", icon: "🌳", grades: [3, 4, 5, 6], desc: "间隔与棵数" },
-  { value: "鸡兔同笼", label: "鸡兔同笼", icon: "🐔", grades: [4, 5, 6], desc: "经典数学问题" },
-  { value: "盈亏问题", label: "盈亏问题", icon: "💰", grades: [4, 5, 6], desc: "多余与不足" },
-  { value: "浓度问题", label: "浓度问题", icon: "🧪", grades: [6], desc: "溶液浓度计算" },
-  { value: "百分比应用", label: "百分比", icon: "📊", grades: [5, 6], desc: "百分数的应用" },
-  { value: "分数应用", label: "分数应用", icon: "🍰", grades: [4, 5, 6], desc: "分数的实际应用" },
+  { value: "和差问题", label: "和差问题", grades: [1, 2, 3, 4, 5, 6] },
+  { value: "倍数问题", label: "倍数问题", grades: [3, 4, 5, 6] },
+  { value: "行程问题", label: "行程问题", grades: [4, 5, 6] },
+  { value: "工程问题", label: "工程问题", grades: [5, 6] },
+  { value: "购物问题", label: "购物问题", grades: [1, 2, 3, 4, 5, 6] },
+  { value: "容量问题", label: "容量问题", grades: [1, 2, 3, 4, 5, 6] },
+  { value: "植树问题", label: "植树问题", grades: [3, 4, 5, 6] },
+  { value: "鸡兔同笼", label: "鸡兔同笼", grades: [4, 5, 6] },
+  { value: "盈亏问题", label: "盈亏问题", grades: [4, 5, 6] },
+  { value: "浓度问题", label: "浓度问题", grades: [6] },
+  { value: "百分比应用", label: "百分比应用", grades: [5, 6] },
+  { value: "分数应用", label: "分数应用", grades: [4, 5, 6] },
+]
+
+const stepLabels = [
+  "查看题目要求",
+  "阅读题目内容",
+  "思考解题方法", 
+  "输入你的答案",
+  "查看AI图解步骤",
+  "跟着图解学习",
+  "完成学习总结"
 ]
 
 export default function AIGeneratorPage() {
@@ -31,24 +42,20 @@ export default function AIGeneratorPage() {
   const [models, setModels] = useState<string[]>([])
   const [selectedModel, setSelectedModel] = useState<string>("")
 
-  // 配置状态
   const [grade, setGrade] = useState(3)
   const [questionType, setQuestionType] = useState("和差问题")
   const [difficulty, setDifficulty] = useState<"easy" | "medium" | "hard">("medium")
   const [count, setCount] = useState(1)
 
-  // 题目状态
   const [generating, setGenerating] = useState(false)
   const [questions, setQuestions] = useState<GeneratedQuestion[]>([])
+  const [error, setError] = useState<string | null>(null)
   const [currentQuestionIndex, setCurrentQuestionIndex] = useState(0)
   const [userAnswer, setUserAnswer] = useState("")
   const [hasAnswered, setHasAnswered] = useState(false)
-  const [error, setError] = useState<string | null>(null)
-
-  // 解析状态
   const [diagramStep, setDiagramStep] = useState(0)
 
-  // API 配置状态
+  // 配置状态
   const [showConfig, setShowConfig] = useState(false)
   const [apiEndpoint, setApiEndpoint] = useState("")
   const [apiKey, setApiKey] = useState("")
@@ -58,6 +65,7 @@ export default function AIGeneratorPage() {
   // 跟踪是否已初始化
   const initializationRef = useRef(false)
 
+  // OpenRouter 免费模型列表
   const openrouterFreeModels = [
     'google/gemma-2-9b-it:free',
     'meta-llama/llama-3.1-8b-instruct:free',
@@ -74,6 +82,8 @@ export default function AIGeneratorPage() {
   const handleGradeChange = (newGrade: number) => {
     setGrade(newGrade)
     const availableTypes = getAvailableQuestionTypes(newGrade)
+
+    // 如果当前题型不在新年级的可用题型中，切换到第一个可用题型
     if (!availableTypes.find(type => type.value === questionType)) {
       setQuestionType(availableTypes[0].value)
     }
@@ -90,23 +100,11 @@ export default function AIGeneratorPage() {
     if (savedApiKey) setApiKey(savedApiKey)
     if (savedUseCloud) setUseCloud(savedUseCloud === "true")
     if (savedProvider) setProvider(savedProvider)
-    else setProvider('ollama')
+    else {
+      // 默认先尝试 Ollama
+      setProvider('ollama')
+    }
   }, [])
-
-  // 当 provider 或 useCloud 变化时，自动更新模型列表
-  useEffect(() => {
-    if (initializationRef.current) {
-      // 只在初始化完成后才响应变化
-      updateModelList(provider, useCloud, apiEndpoint, apiKey)
-    }
-  }, [provider, useCloud])
-
-  // 当 OpenRouter API Key 变化时，重新获取模型列表
-  useEffect(() => {
-    if (initializationRef.current && provider === 'openrouter' && apiKey) {
-      updateModelList(provider, useCloud, apiEndpoint, apiKey)
-    }
-  }, [apiKey])
   
   // 初始化检查 - 只在组件挂载时运行一次
   useEffect(() => {
@@ -114,6 +112,7 @@ export default function AIGeneratorPage() {
     initializationRef.current = true
     
     const performInitialCheck = async () => {
+      // 先尝试 Ollama
       const config = {
         endpoint: useCloud ? apiEndpoint : undefined,
         apiKey: useCloud ? apiKey : undefined,
@@ -125,10 +124,12 @@ export default function AIGeneratorPage() {
         const modelList = await getAvailableModels(config)
         if (modelList.length > 0) {
           setModels(modelList)
+          // 优先选择 qwen 模型
           const qwenModel = modelList.find(m => m.includes('qwen'))
           setSelectedModel(qwenModel || modelList[0])
         }
       } else {
+        // Ollama 不可用，自动切换到 OpenRouter 作为后备方案
         setProvider('openrouter')
         setOllamaAvailable(true)
         setModels(openrouterFreeModels)
@@ -139,17 +140,20 @@ export default function AIGeneratorPage() {
     performInitialCheck()
   }, [])
 
-  // 更新模型列表 - 根据当前配置获取模型
-  const updateModelList = async (currentProvider: 'ollama' | 'openrouter', currentUseCloud: boolean, currentEndpoint: string, currentApiKey: string) => {
-    if (currentProvider === 'openrouter') {
-      // OpenRouter: 尝试获取模型列表，失败则使用默认免费模型
-      if (currentApiKey) {
+  // 手动检查当前提供商的可用性
+  const manualCheckAvailability = useCallback(async () => {
+    if (provider === 'openrouter') {
+      // OpenRouter: 如果有 API Key，尝试获取免费模型列表
+      if (apiKey) {
         try {
           const response = await fetch('/api/openrouter/models', {
             method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ apiKey: currentApiKey }),
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ apiKey }),
           })
+
           if (response.ok) {
             const data = await response.json()
             if (data.models && data.models.length > 0) {
@@ -159,41 +163,33 @@ export default function AIGeneratorPage() {
             }
           }
         } catch (error) {
-          console.log('获取 OpenRouter 模型失败，使用默认列表')
+          // 如果获取失败，使用默认的免费模型列表
         }
       }
-      // 使用默认免费模型
+
+      // 使用默认的免费模型列表
       setModels(openrouterFreeModels)
       setSelectedModel(openrouterFreeModels[0])
       return
     }
 
-    // Ollama: 本地或云端
+    // 检查 Ollama
     const config = {
-      endpoint: currentUseCloud ? currentEndpoint : undefined,
-      apiKey: currentUseCloud ? currentApiKey : undefined,
+      endpoint: useCloud ? apiEndpoint : undefined,
+      apiKey: useCloud ? apiKey : undefined,
     }
+    const available = await checkOllamaAvailable(config)
     
-    try {
-      const available = await checkOllamaAvailable(config)
-      if (available) {
-        const modelList = await getAvailableModels(config)
-        if (modelList.length > 0) {
-          setModels(modelList)
-          const qwenModel = modelList.find(m => m.includes('qwen'))
-          setSelectedModel(qwenModel || modelList[0])
-        }
-      } else {
-        console.log('Ollama 不可用')
-        setModels([])
-        setSelectedModel('')
+    if (available) {
+      const modelList = await getAvailableModels(config)
+      if (modelList.length > 0) {
+        setModels(modelList)
+        // 优先选择 qwen 模型
+        const qwenModel = modelList.find(m => m.includes('qwen'))
+        setSelectedModel(qwenModel || modelList[0])
       }
-    } catch (error) {
-      console.log('获取 Ollama 模型失败', error)
-      setModels([])
-      setSelectedModel('')
     }
-  }
+  }, [provider, useCloud, apiEndpoint, apiKey, openrouterFreeModels])
 
   // 保存配置
   const handleSaveConfig = () => {
@@ -202,8 +198,8 @@ export default function AIGeneratorPage() {
     localStorage.setItem("ollama_use_cloud", String(useCloud))
     localStorage.setItem("ollama_provider", provider)
     setShowConfig(false)
-    // 保存后重新获取模型列表
-    updateModelList(provider, useCloud, apiEndpoint, apiKey)
+    // 重新检查可用性
+    manualCheckAvailability()
   }
 
   const handleGenerate = async () => {
@@ -212,6 +208,7 @@ export default function AIGeneratorPage() {
       return
     }
 
+    // OpenRouter 需要 API Key
     if (provider === 'openrouter' && !apiKey) {
       setError("使用 OpenRouter 需要配置 API Key，请点击配置按钮")
       return
@@ -286,29 +283,18 @@ export default function AIGeneratorPage() {
   const currentQuestion = questions[currentQuestionIndex]
   const isCorrect = currentQuestion && userAnswer.trim() === String(currentQuestion.answer).trim()
 
-  // 获取图解步骤 - 基于 visual_data 的 step 属性
+  // 获取图解步骤
   const getDiagramSteps = () => {
     if (!currentQuestion || !hasAnswered) return []
     
-    // 如果有 visual_data，基于其 step 属性生成步骤
-    if (currentQuestion.visual_data && currentQuestion.visual_data.length > 0) {
-      // 找出最大的 step 值
-      const maxStep = Math.max(...currentQuestion.visual_data.map((inst: any) => inst.step || 0))
-      
-      // 生成步骤数组
-      const steps = []
-      for (let i = 0; i <= maxStep; i++) {
-        steps.push(`第 ${i + 1} 步`)
-      }
-      
-      return steps
-    }
-    
-    // 如果没有 visual_data，使用 visual_guide 的文字步骤
     const steps = []
     if (currentQuestion.visual_guide) {
+      // 将文本说明分解为步骤
       const lines = currentQuestion.visual_guide.split('\n').filter(line => line.trim())
       steps.push(...lines)
+    }
+    if (currentQuestion.visual_data && currentQuestion.visual_data.length > 0) {
+      steps.push("查看AI绘制的图形帮助理解")
     }
     if (currentQuestion.explain) {
       steps.push("学习详细的解题方法")
@@ -317,22 +303,15 @@ export default function AIGeneratorPage() {
   }
 
   const diagramSteps = getDiagramSteps()
-  
-  // 获取当前步骤的文字说明
-  const getCurrentStepDescription = () => {
-    if (!currentQuestion || !currentQuestion.visual_guide) return ''
-    
-    const lines = currentQuestion.visual_guide.split('\n').filter(line => line.trim())
-    
-    // 如果有 visual_data，尝试匹配步骤
-    if (currentQuestion.visual_data && currentQuestion.visual_data.length > 0) {
-      // 找出当前步骤对应的说明
-      if (diagramStep < lines.length) {
-        return lines[diagramStep]
-      }
+
+  // Speak function
+  const speak = (msg: string) => {
+    if (typeof window !== 'undefined') {
+      const u = new SpeechSynthesisUtterance(msg)
+      u.lang = 'zh-CN'
+      window.speechSynthesis.cancel()
+      window.speechSynthesis.speak(u)
     }
-    
-    return lines[0] || ''
   }
 
   if (ollamaAvailable === null) {
@@ -397,110 +376,220 @@ export default function AIGeneratorPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 via-pink-50 to-yellow-50 p-8">
-      <div className="max-w-5xl mx-auto">
-
-        {/* 顶部标题区 */}
-        <div className="text-center mb-8">
-          <div className="inline-flex items-center gap-3 bg-white rounded-full px-6 py-3 shadow-lg border-2 border-orange-200 mb-4">
-            <span className="text-4xl">🤖</span>
-            <h1 className="text-2xl font-bold bg-gradient-to-r from-orange-500 via-pink-500 to-purple-500 bg-clip-text text-transparent">
-              AI 智能出题助手
-            </h1>
+    <>
+      {/* 顶部导航 */}
+      <div className="sticky top-0 z-50 bg-white/90 backdrop-blur-md shadow-md mb-4">
+        <div className="max-w-7xl mx-auto px-6 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <div className="text-3xl">🤖✨</div>
+            <div>
+              <h1 className="text-xl font-bold text-gray-800">
+                AI 智能出题助手 <span className="text-sm text-gray-500">(框架版本)</span>
+              </h1>
+              <p className="text-xs text-gray-600">
+                <a href="/lessons/ai-generator" className="text-blue-500 hover:underline">
+                  ← 切换到自定义UI版本
+                </a>
+              </p>
+            </div>
           </div>
-          <p className="text-gray-600 text-lg">让 AI 为你生成有趣的数学题目，并用图解帮助你理解</p>
         </div>
+      </div>
 
-        {/* 配置按钮 - 右上角 */}
-        <div className="absolute top-8 right-8">
-          <button
-            onClick={() => setShowConfig(true)}
-            className="px-4 py-2 bg-white hover:bg-gray-50 text-gray-700 rounded-xl font-bold transition-all flex items-center gap-2 shadow-md hover:shadow-lg border border-gray-200"
-          >
-            ⚙️ API设置
-          </button>
-        </div>
+      <LessonRunner
+      title="AI 智能出题助手"
+      skillId="ai-generator"
+      intro={{
+        story: "AI 会根据你的年级和选择的题型，为你生成有趣的数学题目，并绘制图形帮助你理解解题过程。",
+        goal: "学会思考解题方法，跟着图解步骤掌握知识点",
+        steps: stepLabels
+      }}
+      hints={{
+        build: [
+          "仔细阅读题目内容",
+          "理解题目要求",
+          "思考解题方法",
+          "输入你的答案"
+        ],
+        map: [
+          "查看AI图解步骤",
+          "跟着图解学习",
+          "理解解题思路"
+        ],
+        microtest: [
+          "检查理解程度",
+          "巩固知识点"
+        ],
+        review: [
+          "回顾学习过程",
+          "总结解题方法"
+        ]
+      }}
+      variantGen={(diff) => {
+        const make = (g: number, type: string, diffx: string, cnt: number) => ({ 
+          label: `${g}年级 ${type} ${diffx} (${cnt}题)`, 
+          apply: () => { 
+            setGrade(g); 
+            setQuestionType(type); 
+            setDifficulty(diffx as any); 
+            setCount(cnt); 
+            setQuestions([]); 
+            setUserAnswer(""); 
+            setHasAnswered(false); 
+            setDiagramStep(0);
+          } 
+        })
+        
+        const availableTypes = getAvailableQuestionTypes(grade)
+        return [
+          make(grade, availableTypes[0]?.value || "和差问题", "easy", 1),
+          make(grade, availableTypes[1]?.value || "和差问题", "medium", 1),
+          make(grade, availableTypes[0]?.value || "和差问题", "hard", 1)
+        ]
+      }}
+      microTestGen={(diff) => {
+        if (!currentQuestion || !hasAnswered) return []
+        
+        const items = []
+        if (currentQuestion.hint) {
+          items.push({
+            prompt: "这道题的关键提示是什么？",
+            placeholder: "输入关键提示",
+            check: (v: string) => v.toLowerCase().includes(currentQuestion.hint!.toLowerCase().substring(0, 10))
+          })
+        }
+        items.push({
+          prompt: "这道题的正确答案是？",
+          placeholder: "输入答案",
+          check: (v: string) => v.trim() === String(currentQuestion.answer).trim()
+        })
+        return items
+      }}
+      onEvaluate={() => {
+        if (!hasAnswered) {
+          return { correct: false, text: "请先回答问题并查看图解步骤", hint: "完成答题后才能进行评估" }
+        }
+        return { 
+          correct: isCorrect, 
+          text: isCorrect ? "太棒了！你掌握了这道题的解题方法！" : "继续努力，多看看图解步骤会帮助你理解",
+          hint: currentQuestion?.hint 
+        }
+      }}
+    >
+      <Narration avatar="/icons/area.svg" name="老师">
+        {questions.length === 0 ? "让我们先来设置题目参数，生成适合你的题目吧！" :
+         !hasAnswered ? "请仔细阅读题目，思考后输入你的答案" :
+         isCorrect ? "太棒了！回答正确！让我们看看详细的图解步骤" :
+         "没关系，让我们跟着AI图解来学习解题方法"}
+      </Narration>
 
-        <Narration avatar="/icons/area.svg" name="AI老师">
-          {questions.length === 0 ? "让我们先来设置题目参数，生成适合你的题目吧！" :
-           !hasAnswered ? "请仔细阅读题目，思考后输入你的答案" :
-           isCorrect ? "太棒了！回答正确！让我们看看详细的图解步骤" :
-           "没关系，让我们跟着AI图解来学习解题方法"}
-        </Narration>
-
-        {/* 配置区 */}
+      <div className="controls" style={{ flexWrap: "wrap" }}>
         {questions.length === 0 && (
-          <div className="bg-white rounded-3xl shadow-xl p-8 border-4 border-orange-100 mb-6">
-            <h2 className="text-xl font-bold text-gray-800 mb-6 flex items-center gap-2">
-              <span>📝</span> 题目设置
-            </h2>
-
-            <div className="controls" style={{ flexWrap: "wrap", gap: "16px" }}>
-              {/* 年级 */}
-              <div className="control">
-                <label>年级</label>
+          <>
+            {/* Model Selection */}
+            <div className="control">
+              <label>AI 模型</label>
+              {provider === 'openrouter' ? (
                 <select
-                  value={grade}
-                  onChange={(e) => handleGradeChange(parseInt(e.target.value))}
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
                   className="w-full border-2 border-orange-200 rounded-xl px-3 py-2 focus:border-orange-400 outline-none bg-orange-50/50 hover:bg-orange-50 transition-all"
                 >
-                  {[1, 2, 3, 4, 5, 6].map((g) => (
-                    <option key={g} value={g}>
-                      {g}年级
+                  {models.map((model) => (
+                    <option key={model} value={model}>
+                      {model}
                     </option>
                   ))}
                 </select>
-              </div>
-
-              {/* 题型 */}
-              <div className="control" style={{ minWidth: "200px" }}>
-                <label>题型</label>
+              ) : (
                 <select
-                  value={questionType}
-                  onChange={(e) => setQuestionType(e.target.value)}
+                  value={selectedModel}
+                  onChange={(e) => setSelectedModel(e.target.value)}
                   className="w-full border-2 border-orange-200 rounded-xl px-3 py-2 focus:border-orange-400 outline-none bg-orange-50/50 hover:bg-orange-50 transition-all"
                 >
-                  {getAvailableQuestionTypes(grade).map((type) => (
-                    <option key={type.value} value={type.value}>
-                      {type.icon} {type.label}
+                  {models.map((model) => (
+                    <option key={model} value={model}>
+                      {model}
                     </option>
                   ))}
                 </select>
-              </div>
-
-              {/* 难度 */}
-              <div className="control">
-                <label>难度</label>
-                <select
-                  value={difficulty}
-                  onChange={(e) => setDifficulty(e.target.value as any)}
-                  className="w-full border-2 border-orange-200 rounded-xl px-3 py-2 focus:border-orange-400 outline-none bg-orange-50/50 hover:bg-orange-50 transition-all"
-                >
-                  <option value="easy">⭐ 简单</option>
-                  <option value="medium">⭐⭐ 中等</option>
-                  <option value="hard">⭐⭐⭐ 困难</option>
-                </select>
-              </div>
-
-              {/* 数量 */}
-              <div className="control">
-                <label>题目数量: {count}</label>
-                <input
-                  type="range"
-                  min="1"
-                  max="5"
-                  value={count}
-                  onChange={(e) => setCount(parseInt(e.target.value))}
-                  className="w-full accent-orange-400"
-                />
-              </div>
+              )}
             </div>
 
-            {/* 生成按钮 */}
+            {/* Grade Selection */}
+            <div className="control">
+              <label>年级</label>
+              <select
+                value={grade}
+                onChange={(e) => handleGradeChange(parseInt(e.target.value))}
+                className="w-full border-2 border-orange-200 rounded-xl px-3 py-2 focus:border-orange-400 outline-none bg-orange-50/50 hover:bg-orange-50 transition-all"
+              >
+                {[1, 2, 3, 4, 5, 6].map((g) => (
+                  <option key={g} value={g}>
+                    {g}年级
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Question Type */}
+            <div className="control">
+              <label>题型</label>
+              <select
+                value={questionType}
+                onChange={(e) => setQuestionType(e.target.value)}
+                className="w-full border-2 border-orange-200 rounded-xl px-3 py-2 focus:border-orange-400 outline-none bg-orange-50/50 hover:bg-orange-50 transition-all"
+              >
+                {getAvailableQuestionTypes(grade).map((type) => (
+                  <option key={type.value} value={type.value}>
+                    {type.label}
+                  </option>
+                ))}
+              </select>
+            </div>
+
+            {/* Difficulty */}
+            <div className="control">
+              <label>难度</label>
+              <select
+                value={difficulty}
+                onChange={(e) => setDifficulty(e.target.value as any)}
+                className="w-full border-2 border-orange-200 rounded-xl px-3 py-2 focus:border-orange-400 outline-none bg-orange-50/50 hover:bg-orange-50 transition-all"
+              >
+                <option value="easy">简单</option>
+                <option value="medium">中等</option>
+                <option value="hard">困难</option>
+              </select>
+            </div>
+
+            {/* Count */}
+            <div className="control">
+              <label>题目数量: {count}</label>
+              <input
+                type="range"
+                min="1"
+                max="5"
+                value={count}
+                onChange={(e) => setCount(parseInt(e.target.value))}
+                className="w-full accent-orange-400"
+              />
+            </div>
+
+            {/* Config Button */}
+            <div className="control">
+              <button
+                onClick={() => setShowConfig(true)}
+                className="px-4 py-2 bg-gradient-to-r from-orange-100 to-pink-100 hover:from-orange-200 hover:to-pink-200 text-gray-700 rounded-xl font-bold transition-all flex items-center gap-2 shadow-md hover:shadow-lg"
+              >
+                ⚙️ 配置
+              </button>
+            </div>
+
+            {/* Generate Button */}
             <button
               onClick={handleGenerate}
               disabled={generating}
-              className={`w-full mt-6 px-6 py-4 rounded-2xl font-bold text-white text-lg transition-all shadow-lg ${
+              className={`px-6 py-3 rounded-xl font-bold text-white transition-all shadow-lg ${
                 generating
                   ? "bg-gray-400 cursor-not-allowed"
                   : "bg-gradient-to-r from-orange-400 via-pink-400 to-yellow-400 hover:from-orange-500 hover:via-pink-500 hover:to-yellow-500 hover:shadow-xl hover:scale-105"
@@ -508,259 +597,233 @@ export default function AIGeneratorPage() {
             >
               {generating ? (
                 <span className="flex items-center justify-center gap-2">
-                  <div className="animate-spin rounded-full h-5 w-5 border-b-2 border-white"></div>
+                  <div className="animate-spin rounded-full h-4 w-4 border-b-2 border-white"></div>
                   AI思考中...
                 </span>
               ) : (
                 "🚀 生成题目"
               )}
             </button>
-          </div>
+          </>
         )}
 
-        {/* 错误提示 */}
-        {error && (
-          <div className="intro-block" style={{ borderColor: 'var(--danger)', backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
-            <div className="intro-title" style={{ color: 'var(--danger)' }}>❌ 生成失败</div>
-            <div className="whitespace-pre-line text-sm">{error}</div>
-          </div>
-        )}
-
-        {/* 题目显示区 */}
-        {currentQuestion && (
+        {questions.length > 0 && (
           <>
-            {/* 题目导航 */}
-            {questions.length > 1 && (
-              <div className="flex items-center justify-between mb-4 bg-white rounded-2xl p-4 shadow-md border border-gray-200">
+            {/* Question Navigation */}
+            <div className="control">
+              <label>题目 {currentQuestionIndex + 1} / {questions.length}</label>
+              <div className="flex gap-2">
                 <button
                   onClick={handlePrevQuestion}
                   disabled={currentQuestionIndex === 0}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   ⬅️ 上一题
                 </button>
-                <span className="font-bold text-gray-700">
-                  题目 {currentQuestionIndex + 1} / {questions.length}
-                </span>
                 <button
                   onClick={handleNextQuestion}
                   disabled={currentQuestionIndex === questions.length - 1}
-                  className="px-4 py-2 bg-gray-200 text-gray-700 rounded-xl font-bold hover:bg-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+                  className="px-3 py-1 bg-gray-200 text-gray-700 rounded-lg font-bold hover:bg-gray-300 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
                 >
                   下一题 ➡️
                 </button>
               </div>
-            )}
-
-            {/* 题目卡片 */}
-            <div className="intro-block bg-white rounded-3xl shadow-xl p-8 border-4 border-blue-100">
-              <div className="intro-title text-blue-600">📚 {currentQuestion.category}</div>
-              <div style={{ fontSize: 18, lineHeight: 1.8, margin: '16px 0', color: '#374151' }}>
-                {currentQuestion.prompt}
-              </div>
-
-              {/* 提示 */}
-              {!hasAnswered && currentQuestion.hint && (
-                <div style={{ 
-                  backgroundColor: 'rgba(251, 191, 36, 0.1)', 
-                  border: '2px solid rgba(251, 191, 36, 0.3)', 
-                  borderRadius: 16, 
-                  padding: 16, 
-                  margin: '16px 0' 
-                }}>
-                  <div style={{ fontWeight: 'bold', color: '#d97706', marginBottom: 8, fontSize: 16 }}>
-                    💡 提示:
-                  </div>
-                  <div style={{ fontSize: 15, color: '#92400e', lineHeight: 1.6 }}>
-                    {currentQuestion.hint}
-                  </div>
-                </div>
-              )}
-
-              {/* 答题区 */}
-              {!hasAnswered && (
-                <div style={{ margin: '20px 0' }}>
-                  <label style={{ display: 'block', fontWeight: 'bold', marginBottom: 12, fontSize: 16 }}>
-                    ✏️ 你的答案:
-                  </label>
-                  <input
-                    type="text"
-                    value={userAnswer}
-                    onChange={(e) => setUserAnswer(e.target.value)}
-                    onKeyPress={(e) => {
-                      if (e.key === 'Enter' && userAnswer.trim()) {
-                        handleSubmitAnswer()
-                      }
-                    }}
-                    placeholder="输入答案后按回车..."
-                    style={{
-                      width: '100%',
-                      border: '2px solid #fbbf24',
-                      borderRadius: 12,
-                      padding: '16px',
-                      fontSize: 18,
-                      outline: 'none',
-                      transition: 'border-color 0.2s',
-                      backgroundColor: '#fffbeb'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = '#f59e0b'}
-                    onBlur={(e) => e.target.style.borderColor = '#fbbf24'}
-                  />
-                  <button
-                    onClick={handleSubmitAnswer}
-                    disabled={!userAnswer.trim()}
-                    style={{
-                      marginTop: 16,
-                      padding: '14px 28px',
-                      backgroundColor: userAnswer.trim() ? '#10b981' : '#d1d5db',
-                      color: 'white',
-                      border: 'none',
-                      borderRadius: 12,
-                      fontSize: 18,
-                      fontWeight: 'bold',
-                      cursor: userAnswer.trim() ? 'pointer' : 'not-allowed',
-                      transition: 'all 0.2s',
-                      boxShadow: userAnswer.trim() ? '0 4px 6px rgba(16, 185, 129, 0.3)' : 'none'
-                    }}
-                  >
-                    ✅ 提交答案
-                  </button>
-                </div>
-              )}
-
-              {/* 结果显示 */}
-              {hasAnswered && (
-                <div style={{ 
-                  margin: '20px 0',
-                  padding: 20,
-                  borderRadius: 16,
-                  backgroundColor: isCorrect ? 'rgba(34, 197, 94, 0.1)' : 'rgba(251, 146, 60, 0.1)',
-                  border: `3px solid ${isCorrect ? 'rgba(34, 197, 94, 0.4)' : 'rgba(251, 146, 60, 0.4)'}`
-                }}>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: 16, marginBottom: 16 }}>
-                    <div style={{ fontSize: 48 }}>{isCorrect ? '🎉' : '💪'}</div>
-                    <div style={{ 
-                      fontSize: 24, 
-                      fontWeight: 'bold', 
-                      color: isCorrect ? '#16a34a' : '#ea580c' 
-                    }}>
-                      {isCorrect ? '太棒了！回答正确！' : '再想想哦！'}
-                    </div>
-                  </div>
-                  <div style={{ 
-                    backgroundColor: 'rgba(255, 255, 255, 0.8)', 
-                    padding: 16, 
-                    borderRadius: 12, 
-                    marginBottom: 16,
-                    display: 'grid',
-                    gridTemplateColumns: '1fr 1fr',
-                    gap: 16
-                  }}>
-                    <div>
-                      <span style={{ fontWeight: 'bold', color: '#6b7280', fontSize: 14 }}>你的答案: </span>
-                      <span style={{ fontSize: 18, fontWeight: 'bold', color: '#374151' }}>
-                        {userAnswer}
-                      </span>
-                    </div>
-                    <div>
-                      <span style={{ fontWeight: 'bold', color: '#6b7280', fontSize: 14 }}>✔️ 正确答案: </span>
-                      <span style={{ fontSize: 18, fontWeight: 'bold', color: '#7c3aed' }}>
-                        {currentQuestion.answer}
-                      </span>
-                    </div>
-                  </div>
-                  <button
-                    onClick={() => {
-                      setQuestions([])
-                      setUserAnswer("")
-                      setHasAnswered(false)
-                      setDiagramStep(0)
-                    }}
-                    className="w-full px-6 py-3 bg-gradient-to-r from-blue-400 to-indigo-500 text-white rounded-xl font-bold hover:from-blue-500 hover:to-indigo-600 transition-all shadow-lg hover:shadow-xl text-lg"
-                  >
-                    📝 生成新题目
-                  </button>
-                </div>
-              )}
             </div>
 
-            {/* 图解步骤 - 动画版 */}
-            {hasAnswered && currentQuestion.visual_data && currentQuestion.visual_data.length > 0 && (
-              <div className="bg-white rounded-3xl shadow-xl p-8 border-4 border-purple-100 mt-6">
-                <h3 className="text-xl font-bold text-purple-700 mb-6 flex items-center gap-2">
-                  <span>🎨</span> AI 动画图解
-                </h3>
-                
-                {/* 动画画布 - 根据 diagramStep 显示对应帧 */}
-                <div style={{ 
-                  backgroundColor: 'rgba(168, 85, 247, 0.05)', 
-                  border: '2px solid rgba(168, 85, 247, 0.2)', 
-                  borderRadius: 16, 
-                  padding: 20,
-                  marginBottom: 20
-                }}>
-                  <div style={{ fontWeight: 'bold', color: '#7c3aed', marginBottom: 16, fontSize: 16, textAlign: 'center' }}>
-                    🎬 动画演示 - 第 {diagramStep + 1} 步
-                  </div>
-                  <div className="svg-panel" style={{ display: 'flex', justifyContent: 'center' }}>
-                    <VisualCanvas 
-                      instructions={currentQuestion.visual_data} 
-                      width={600} 
-                      height={300}
-                      currentStep={diagramStep}
-                    />
-                  </div>
-                </div>
+            {/* New Question Button */}
+            <div className="control">
+              <button
+                onClick={() => {
+                  setQuestions([])
+                  setUserAnswer("")
+                  setHasAnswered(false)
+                  setDiagramStep(0)
+                }}
+                className="px-4 py-2 bg-gradient-to-r from-blue-400 to-indigo-500 text-white rounded-xl font-bold hover:from-blue-500 hover:to-indigo-600 transition-all shadow-lg hover:shadow-xl"
+              >
+                📝 生成新题目
+              </button>
+            </div>
+          </>
+        )}
+      </div>
 
-                {/* 步骤控制器 */}
-                <StepPlayer 
-                  steps={diagramSteps} 
-                  title="解题步骤" 
-                  index={diagramStep} 
-                  onIndexChange={setDiagramStep}
-                  auto={false}
-                />
-                
-                {/* 当前步骤说明 */}
-                {getCurrentStepDescription() && (
+      {error && (
+        <div className="intro-block" style={{ borderColor: 'var(--danger)', backgroundColor: 'rgba(239, 68, 68, 0.1)' }}>
+          <div className="intro-title" style={{ color: 'var(--danger)' }}>❌ 生成失败</div>
+          <div className="whitespace-pre-line text-sm">{error}</div>
+        </div>
+      )}
+
+      {/* Question Display */}
+      {currentQuestion && (
+        <div className="intro-block">
+          <div className="intro-title">📚 {currentQuestion.category}</div>
+          <div style={{ fontSize: 18, lineHeight: 1.6, margin: '12px 0' }}>
+            {currentQuestion.prompt}
+          </div>
+
+          {/* Hint - only show if not answered yet */}
+          {!hasAnswered && currentQuestion.hint && (
+            <div style={{ 
+              backgroundColor: 'rgba(251, 191, 36, 0.1)', 
+              border: '1px solid rgba(251, 191, 36, 0.3)', 
+              borderRadius: 8, 
+              padding: 12, 
+              margin: '12px 0' 
+            }}>
+              <div style={{ fontWeight: 'bold', color: '#d97706', marginBottom: 4 }}>
+                💡 提示:
+              </div>
+              <div style={{ fontSize: 14, color: '#92400e' }}>
+                {currentQuestion.hint}
+              </div>
+            </div>
+          )}
+
+          {/* Answer Input */}
+          {!hasAnswered && (
+            <div style={{ margin: '16px 0' }}>
+              <label style={{ display: 'block', fontWeight: 'bold', marginBottom: 8 }}>
+                ✏️ 你的答案:
+              </label>
+              <input
+                type="text"
+                value={userAnswer}
+                onChange={(e) => setUserAnswer(e.target.value)}
+                onKeyPress={(e) => {
+                  if (e.key === 'Enter') {
+                    handleSubmitAnswer()
+                  }
+                }}
+                placeholder="输入答案..."
+                style={{
+                  width: '100%',
+                  border: '2px solid var(--border)',
+                  borderRadius: 8,
+                  padding: '12px',
+                  fontSize: 16,
+                  outline: 'none',
+                  transition: 'border-color 0.2s'
+                }}
+                onFocus={(e) => e.target.style.borderColor = 'var(--primary)'}
+                onBlur={(e) => e.target.style.borderColor = 'var(--border)'}
+              />
+              <button
+                onClick={handleSubmitAnswer}
+                disabled={!userAnswer.trim()}
+                style={{
+                  marginTop: 12,
+                  padding: '12px 24px',
+                  backgroundColor: userAnswer.trim() ? 'var(--primary)' : 'var(--muted)',
+                  color: 'white',
+                  border: 'none',
+                  borderRadius: 8,
+                  fontSize: 16,
+                  fontWeight: 'bold',
+                  cursor: userAnswer.trim() ? 'pointer' : 'not-allowed',
+                  transition: 'all 0.2s'
+                }}
+              >
+                ✅ 提交答案
+              </button>
+            </div>
+          )}
+
+          {/* Result */}
+          {hasAnswered && (
+            <div style={{ 
+              margin: '16px 0',
+              padding: 16,
+              borderRadius: 8,
+              backgroundColor: isCorrect ? 'rgba(34, 197, 94, 0.1)' : 'rgba(239, 68, 68, 0.1)',
+              border: `2px solid ${isCorrect ? 'rgba(34, 197, 94, 0.3)' : 'rgba(239, 68, 68, 0.3)'}`
+            }}>
+              <div style={{ display: 'flex', alignItems: 'center', gap: 12, marginBottom: 12 }}>
+                <div style={{ fontSize: 32 }}>{isCorrect ? '🎉' : '💪'}</div>
+                <div style={{ 
+                  fontSize: 18, 
+                  fontWeight: 'bold', 
+                  color: isCorrect ? '#16a34a' : '#dc2626' 
+                }}>
+                  {isCorrect ? '太棒了！回答正确！' : '再想想哦！'}
+                </div>
+              </div>
+              <div style={{ backgroundColor: 'rgba(255, 255, 255, 0.7)', padding: 12, borderRadius: 6, marginBottom: 12 }}>
+                <span style={{ fontWeight: 'bold', color: '#374151' }}>✔️ 正确答案: </span>
+                <span style={{ fontSize: 16, fontWeight: 'bold', color: '#4f46e5' }}>
+                  {currentQuestion.answer}
+                </span>
+              </div>
+            </div>
+          )}
+
+          {/* Diagram Steps - only show after answering */}
+          {hasAnswered && diagramSteps.length > 0 && (
+            <div style={{ margin: '20px 0' }}>
+              <StepPlayer 
+                steps={diagramSteps} 
+                title="🎨 AI图解步骤" 
+                index={diagramStep} 
+                onIndexChange={setDiagramStep}
+                auto={false}
+              />
+              
+              {/* Show visual content based on current step */}
+              <div style={{ margin: '16px 0', minHeight: 200 }}>
+                {diagramStep < diagramSteps.length - 1 && currentQuestion.visual_guide && (
                   <div style={{ 
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)', 
-                    border: '2px solid rgba(59, 130, 246, 0.3)', 
-                    borderRadius: 16, 
-                    padding: 20,
-                    marginTop: 16
+                    backgroundColor: 'rgba(168, 85, 247, 0.1)', 
+                    border: '1px solid rgba(168, 85, 247, 0.3)', 
+                    borderRadius: 8, 
+                    padding: 16 
                   }}>
-                    <div style={{ fontWeight: 'bold', color: '#2563eb', marginBottom: 12, fontSize: 16 }}>
-                      📝 第 {diagramStep + 1} 步说明:
+                    <div style={{ fontWeight: 'bold', color: '#7c3aed', marginBottom: 8 }}>
+                      📝 解题步骤:
                     </div>
-                    <div style={{ fontSize: 15, lineHeight: 1.8, color: '#1e40af' }}>
-                      {getCurrentStepDescription()}
+                    <div style={{ fontSize: 14, lineHeight: 1.6, color: '#4c1d95' }}>
+                      {currentQuestion.visual_guide.split('\n')[diagramStep] || ''}
                     </div>
                   </div>
                 )}
                 
-                {/* 详细解析 */}
-                {currentQuestion.explain && (
+                {diagramStep === diagramSteps.length - 1 && currentQuestion.visual_data && currentQuestion.visual_data.length > 0 && (
                   <div style={{ 
                     backgroundColor: 'rgba(34, 197, 94, 0.1)', 
-                    border: '2px solid rgba(34, 197, 94, 0.3)', 
-                    borderRadius: 16, 
-                    padding: 20,
-                    marginTop: 16
+                    border: '1px solid rgba(34, 197, 94, 0.3)', 
+                    borderRadius: 8, 
+                    padding: 16 
                   }}>
-                    <div style={{ fontWeight: 'bold', color: '#16a34a', marginBottom: 12, fontSize: 16 }}>
-                      📖 完整解析:
+                    <div style={{ fontWeight: 'bold', color: '#16a34a', marginBottom: 12 }}>
+                      🖼️ AI 智能绘图:
                     </div>
-                    <div style={{ fontSize: 15, lineHeight: 1.8, color: '#065f46' }}>
+                    <div style={{ display: 'flex', justifyContent: 'center' }}>
+                      <VisualCanvas instructions={currentQuestion.visual_data} width={500} height={300} />
+                    </div>
+                  </div>
+                )}
+                
+                {currentQuestion.explain && diagramStep === diagramSteps.length - 1 && (
+                  <div style={{ 
+                    backgroundColor: 'rgba(59, 130, 246, 0.1)', 
+                    border: '1px solid rgba(59, 130, 246, 0.3)', 
+                    borderRadius: 8, 
+                    padding: 16,
+                    marginTop: 12
+                  }}>
+                    <div style={{ fontWeight: 'bold', color: '#2563eb', marginBottom: 8 }}>
+                      📖 详细解析:
+                    </div>
+                    <div style={{ fontSize: 14, lineHeight: 1.6, color: '#1e40af' }}>
                       {currentQuestion.explain}
                     </div>
                   </div>
                 )}
               </div>
-            )}
-          </>
-        )}
-      </div>
+            </div>
+          )}
+        </div>
+      )}
 
       {/* 配置模态框 */}
       {showConfig && (
@@ -805,31 +868,6 @@ export default function AIGeneratorPage() {
             </div>
 
             <div style={{ display: 'flex', flexDirection: 'column', gap: 20 }}>
-              {/* 模型选择 */}
-              <div>
-                <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', color: '#374151', marginBottom: 8 }}>
-                  🤖 AI 模型
-                </label>
-                <select
-                  value={selectedModel}
-                  onChange={(e) => setSelectedModel(e.target.value)}
-                  style={{
-                    width: '100%',
-                    border: '2px solid var(--border)',
-                    borderRadius: 8,
-                    padding: 12,
-                    fontSize: 14,
-                    outline: 'none'
-                  }}
-                >
-                  {models.map((model) => (
-                    <option key={model} value={model}>
-                      {model}
-                    </option>
-                  ))}
-                </select>
-              </div>
-
               {/* Provider Selection */}
               <div>
                 <label style={{ display: 'block', fontSize: 14, fontWeight: 'bold', color: '#374151', marginBottom: 8 }}>
@@ -990,6 +1028,7 @@ export default function AIGeneratorPage() {
           </div>
         </div>
       )}
-    </div>
+    </LessonRunner>
+    </>
   )
 }
