@@ -214,6 +214,131 @@ export const allLessons: LessonItem[] = [
     tags: ['可视化', '重要']
   },
 
+  // ==================== 数与运算 - 平方立方运算 ====================
+  {
+    href: "/lessons/square-sum",
+    title: "平方和公式",
+    desc: "a² + b² 几何意义",
+    icon: "/icons/area.svg",
+    gradeLevel: 5,
+    difficulty: 3,
+    category: '数与运算',
+    subCategory: '平方立方',
+    duration: 25,
+    tags: ['公式', '几何', '可视化'],
+    new: true,
+    featured: true
+  },
+  {
+    href: "/lessons/square-diff",
+    title: "平方差公式",
+    desc: "a² - b² 几何意义",
+    icon: "/icons/area.svg",
+    gradeLevel: 5,
+    difficulty: 3,
+    category: '数与运算',
+    subCategory: '平方立方',
+    duration: 25,
+    tags: ['公式', '几何', '因式分解'],
+    new: true
+  },
+  {
+    href: "/lessons/cube-sum",
+    title: "立方和公式",
+    desc: "a³ + b³ 3D可视化",
+    icon: "/icons/area.svg",
+    gradeLevel: 6,
+    difficulty: 4,
+    category: '数与运算',
+    subCategory: '平方立方',
+    duration: 30,
+    tags: ['3D', '公式', '体积'],
+    new: true
+  },
+  {
+    href: "/lessons/cube-diff",
+    title: "立方差公式",
+    desc: "a³ - b³ 3D可视化",
+    icon: "/icons/area.svg",
+    gradeLevel: 6,
+    difficulty: 4,
+    category: '数与运算',
+    subCategory: '平方立方',
+    duration: 30,
+    tags: ['3D', '公式', '体积'],
+    new: true
+  },
+  {
+    href: "/lessons/three-square-sum",
+    title: "三个数平方和",
+    desc: "a² + b² + c² 勾股定理",
+    icon: "/icons/area.svg",
+    gradeLevel: 6,
+    difficulty: 4,
+    category: '数与运算',
+    subCategory: '平方立方',
+    duration: 28,
+    tags: ['勾股定理', '几何', '三角形'],
+    new: true,
+    popular: true
+  },
+  {
+    href: "/lessons/arithmetic-operations",
+    title: "算术运算图解",
+    desc: "加减乘除分数小数",
+    icon: "/icons/area.svg",
+    gradeLevel: 4,
+    difficulty: 2,
+    category: '数与运算',
+    subCategory: '四则运算',
+    duration: 35,
+    tags: ['综合', '可视化', '分数', '小数'],
+    new: true,
+    featured: true
+  },
+  {
+    href: "/lessons/square-three-sum",
+    title: "三个数完全平方和",
+    desc: "(a+b+c)² 展开图解",
+    icon: "/icons/area.svg",
+    gradeLevel: 6,
+    difficulty: 4,
+    category: '数与运算',
+    subCategory: '平方立方',
+    duration: 35,
+    tags: ['Canvas动画', '完全平方', '展开式'],
+    new: true,
+    featured: true
+  },
+  {
+    href: "/lessons/sequence-square-sum",
+    title: "平方和数列求和",
+    desc: "1²+2²+...+n² 高斯求和",
+    icon: "/icons/area.svg",
+    gradeLevel: 6,
+    difficulty: 4,
+    category: '数与运算',
+    subCategory: '数列求和',
+    duration: 40,
+    tags: ['高斯求和', '数列', 'Canvas动画', '配对'],
+    new: true,
+    featured: true
+  },
+  {
+    href: "/lessons/sequence-cube-sum",
+    title: "立方和数列求和",
+    desc: "1³+2³+...+n³ 立方和关系",
+    icon: "/icons/area.svg",
+    gradeLevel: 6,
+    difficulty: 4,
+    category: '数与运算',
+    subCategory: '数列求和',
+    duration: 40,
+    tags: ['3D动画', '立方和', '平方和关系', '尼科马霍斯'],
+    new: true,
+    featured: true
+  },
+
   // ==================== 计算工具 ====================
   {
     href: "/lessons/scale",
@@ -263,6 +388,20 @@ export const allLessons: LessonItem[] = [
   },
 
   // ==================== 图形测量 ====================
+  {
+    href: "/lessons/geometric-shapes",
+    title: "几何图形图解",
+    desc: "三角形矩形圆形六边形",
+    icon: "/icons/area.svg",
+    gradeLevel: 4,
+    difficulty: 2,
+    category: '图形测量',
+    subCategory: '基础图形',
+    duration: 30,
+    tags: ['几何', '面积', '周长', '可视化'],
+    new: true,
+    featured: true
+  },
   {
     href: "/lessons/figure-count",
     title: "图形计数",
