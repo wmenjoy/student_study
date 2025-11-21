@@ -20,13 +20,13 @@ export default function AgePage() {
       if(diff==="easy") return [make(20,4,5),make(30,6,5)]
       if(diff==="medium") return [make(40,8,10),make(36,2,6)]
       return [make(50,10,12),make(44,4,8)]
-    }} microTestGen={(diff)=>{
+    }} microTestGen={(difficulty)=>{
       const items=[] as Array<{prompt:string;placeholder?:string;check:(v:string)=>boolean}>
       const A=(sum+diff)/2, B=(sum-diff)/2
       const Af=A+years, Bf=B+years
-      if(diff==="easy") items.push({prompt:"当前年龄A是多少？",placeholder:"输入数字",check:x=>parseInt(x)===A})
-      else if(diff==="medium") items.push({prompt:"当前年龄B是多少？",placeholder:"输入数字",check:x=>parseInt(x)===B})
-      else items.push({prompt:"几年后两人的年龄？写如 A,B",placeholder:"如 15,13",check:x=>x.replaceAll(' ','')===`${Af},${Bf}`})
+      if(difficulty==="easy") items.push({prompt:"当前年龄A是多少？",placeholder:"输入数字",check:x=>parseInt(x)===A})
+      else if(difficulty==="medium") items.push({prompt:"当前年龄B是多少？",placeholder:"输入数字",check:x=>parseInt(x)===B})
+      else items.push({prompt:"几年后两人的年龄？写如 A,B",placeholder:"如 15,13",check:x=>x.replace(/ /g,'')===`${Af},${Bf}`})
       return items
     }} onEvaluate={()=>({ correct: true, text: mapAge(sum,diff,years) })}>
       <div className="controls">

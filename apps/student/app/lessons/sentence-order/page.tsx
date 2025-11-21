@@ -19,9 +19,9 @@ export default function SentenceOrderPage() {
     }} microTestGen={(diff)=>{
       const items=[] as Array<{prompt:string;placeholder?:string;check:(v:string)=>boolean}>
       const target = parts.join("")
-      if(diff==="easy"){items.push({prompt:"把句子写出来",placeholder:"输入句子",check:x=>x.replaceAll(" ","")===target})}
-      else if(diff==="medium"){items.push({prompt:"把‘快乐地’换成‘高兴地’后写出句子",placeholder:"输入句子",check:x=>x.replaceAll(" ","")===target.replace("快乐地","高兴地")})}
-      else {items.push({prompt:"在句末加‘。’写出句子",placeholder:"输入句子",check:x=>x.replaceAll(" ","")===target+"。"})}
+      if(diff==="easy"){items.push({prompt:"把句子写出来",placeholder:"输入句子",check:x=>x.replace(" ","")===target})}
+      else if(diff==="medium"){items.push({prompt:"把‘快乐地’换成‘高兴地’后写出句子",placeholder:"输入句子",check:x=>x.replace(" ","")===target.replace("快乐地","高兴地")})}
+      else {items.push({prompt:"在句末加‘。’写出句子",placeholder:"输入句子",check:x=>x.replace(" ","")===target+"。"})}
       return items
     }} onEvaluate={()=>({ correct: true, text: `句子：${parts.join("")}` })}>
       <SentenceOrder parts={parts} />

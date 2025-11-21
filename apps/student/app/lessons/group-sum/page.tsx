@@ -26,8 +26,8 @@ export default function GroupSumPage() {
       const t=target
       const pairs=()=>{const used=new Set<number>();const ps:number[][]=[];for(let i=0;i<arr.length;i++){if(used.has(i))continue;for(let j=i+1;j<arr.length;j++){if(used.has(j))continue;if(arr[i]+arr[j]===t){ps.push([arr[i],arr[j]]);used.add(i);used.add(j);break}}}return ps}
       if(diff==="easy"){items.push({prompt:"配成的对数是多少？",placeholder:"输入数字",check:x=>parseInt(x)===pairs().length})}
-      else if(diff==="medium"){items.push({prompt:"随意写出一组配对",placeholder:"如 3+8",check:x=>{const s=x.replaceAll(' ','').split('+');if(s.length!==2)return false;const a=parseInt(s[0]),b=parseInt(s[1]);return a+b===t && arr.includes(a)&&arr.includes(b)}})}
-      else {items.push({prompt:"写出所有配对（逗号分隔）",placeholder:"如 1+10,2+9,...",check:x=>{const ex=pairs().map(p=>p.join('+')).join(',');return x.replaceAll(' ','')===ex}})}
+      else if(diff==="medium"){items.push({prompt:"随意写出一组配对",placeholder:"如 3+8",check:x=>{const s=x.replace(' ','').split('+');if(s.length!==2)return false;const a=parseInt(s[0]),b=parseInt(s[1]);return a+b===t && arr.includes(a)&&arr.includes(b)}})}
+      else {items.push({prompt:"写出所有配对（逗号分隔）",placeholder:"如 1+10,2+9,...",check:x=>{const ex=pairs().map(p=>p.join('+')).join(',');return x.replace(' ','')===ex}})}
       return items
     }} onEvaluate={()=>({ correct: true, text: mapGroupSum(nums,target) })}>
       <div className="controls" style={{flexWrap:'wrap'}}>

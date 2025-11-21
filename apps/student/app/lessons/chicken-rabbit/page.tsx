@@ -27,7 +27,7 @@ export default function ChickenRabbitPage() {
       const chickens = heads - rabbits
       if(diff==="easy"){items.push({prompt:"全鸡假设腿数是多少？",placeholder:"输入数字",check:x=>parseInt(x)===allChickenLegs})}
       else if(diff==="medium"){items.push({prompt:"多余腿数是多少？",placeholder:"输入数字",check:x=>parseInt(x)===extra})}
-      else {items.push({prompt:"鸡与兔的数量？写如 鸡x 兔y",placeholder:"鸡x 兔y",check:x=>x.replaceAll(" ","")===`鸡${chickens}兔${rabbits}`})}
+      else {items.push({prompt:"鸡与兔的数量？写如 鸡x 兔y",placeholder:"鸡x 兔y",check:x=>x.replace(" ","")===`鸡${chickens}兔${rabbits}`})}
       return items
     }} onEvaluate={()=>({ correct: true, text: mapChickenRabbit(heads,legs) })}>
       <div className="controls">
