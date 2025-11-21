@@ -9,6 +9,8 @@ export default function SquareSumPage() {
   const [a, setA] = useState(3)
   const [b, setB] = useState(4)
   const [stage, setStage] = useState(0)
+  const [showCanvas, setShowCanvas] = useState(false)
+  const [animationSpeed, setAnimationSpeed] = useState(1000)
 
   const steps = [
     "步骤1：准备——设置两个正方形的边长",
@@ -115,6 +117,29 @@ export default function SquareSumPage() {
             min="1"
             max="10"
           />
+        </div>
+        <div className="control flex flex-col gap-1">
+          <label className="text-sm text-slate-500 font-bold">显示选项</label>
+          <div className="flex gap-2">
+            <button
+              className={`px-3 py-2 rounded-lg text-sm ${showCanvas ? "bg-blue-500 text-white" : "bg-gray-200"}`}
+              onClick={() => { setShowCanvas(!showCanvas); setStage(0) }}
+            >
+              Canvas动画
+            </button>
+          </div>
+        </div>
+        <div className="control flex flex-col gap-1">
+          <label className="text-sm text-slate-500 font-bold">动画速度</label>
+          <select
+            className="border-2 border-slate-200 rounded-lg px-3 py-2 text-sm"
+            value={animationSpeed}
+            onChange={e => setAnimationSpeed(parseInt(e.target.value))}
+          >
+            <option value={2000}>慢速</option>
+            <option value={1000}>正常</option>
+            <option value={500}>快速</option>
+          </select>
         </div>
       </div>
 

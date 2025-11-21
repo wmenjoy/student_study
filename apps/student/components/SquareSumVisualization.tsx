@@ -1,9 +1,9 @@
 "use client"
-import { useEffect, useState } from "react"
+import { useEffect, useState, useRef } from "react"
 
-type Props = { a: number; b: number; stage: number }
+type Props = { a: number; b: number; stage: number; showCanvas?: boolean; animationSpeed?: number }
 
-export function SquareSumVisualization({ a, b, stage }: Props) {
+export function SquareSumVisualization({ a, b, stage, showCanvas = false, animationSpeed = 1000 }: Props) {
   const cellSize = 25
   const padding = 40
   const gap = 60
@@ -59,7 +59,7 @@ export function SquareSumVisualization({ a, b, stage }: Props) {
       setVisibleCellsB(totalCellsB)
       setShowFormula(true)
     }
-  }, [stage, totalCellsA, totalCellsB])
+  }, [showCanvas, a, b, stage, animationSpeed])
 
   return (
     <svg width={svgWidth} height={svgHeight} className="svg-panel">
