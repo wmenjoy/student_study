@@ -296,6 +296,48 @@ export const allLessons: LessonItem[] = [
     new: true,
     featured: true
   },
+  {
+    href: "/lessons/square-three-sum",
+    title: "三个数完全平方和",
+    desc: "(a+b+c)² 展开图解",
+    icon: "/icons/area.svg",
+    gradeLevel: 6,
+    difficulty: 4,
+    category: '数与运算',
+    subCategory: '平方立方',
+    duration: 35,
+    tags: ['Canvas动画', '完全平方', '展开式'],
+    new: true,
+    featured: true
+  },
+  {
+    href: "/lessons/sequence-square-sum",
+    title: "平方和数列求和",
+    desc: "1²+2²+...+n² 高斯求和",
+    icon: "/icons/area.svg",
+    gradeLevel: 6,
+    difficulty: 4,
+    category: '数与运算',
+    subCategory: '数列求和',
+    duration: 40,
+    tags: ['高斯求和', '数列', 'Canvas动画', '配对'],
+    new: true,
+    featured: true
+  },
+  {
+    href: "/lessons/sequence-cube-sum",
+    title: "立方和数列求和",
+    desc: "1³+2³+...+n³ 立方和关系",
+    icon: "/icons/area.svg",
+    gradeLevel: 6,
+    difficulty: 4,
+    category: '数与运算',
+    subCategory: '数列求和',
+    duration: 40,
+    tags: ['3D动画', '立方和', '平方和关系', '尼科马霍斯'],
+    new: true,
+    featured: true
+  },
 
   // ==================== 计算工具 ====================
   {
